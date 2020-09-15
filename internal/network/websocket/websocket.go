@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"sync"
 	"time"
-	"fmt"
 
 	"github.com/gorilla/websocket"
 )
@@ -53,15 +52,11 @@ const (
 // The default upgrader to use
 var upgrader = &websocket.Upgrader{
 	Subprotocols: []string{"mqttv3.1", "mqttv3", "mqtt"},
-	CheckOrigin:  func(r *http.Request) bool {
-	fmt.Println(r.Proto + " Request From: " + r.RemoteAddr + "\tURL: " + r.URL.Path)
-	return true
-	},
+	CheckOrigin:  func(r *http.Request) bool { return true },
 }
 
 // TryUpgrade attempts to upgrade an HTTP request to mqtt over websocket.
 func TryUpgrade(w http.ResponseWriter, r *http.Request) (net.Conn, bool) {
-    fmt.Println(r.Proto + " Request From: " + r.RemoteAddr + "\tURL: " + r.URL.Path)
 	if w == nil || r == nil {
 		return nil, false
 	}
