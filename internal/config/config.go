@@ -96,6 +96,11 @@ type Config struct {
 	Vault      secretStoreConfig   `json:"vault,omitempty"`    // The configuration for the Hashicorp Vault Secret Store.
 	Dynamo     secretStoreConfig   `json:"dynamodb,omitempty"` // The configuration for the AWS DynamoDB Secret Store.
 
+	// Defining New Attributes in emitter.conf
+	ApiServer	string              `json:"api_server"`
+	SecretKey	string              `json:"secret_key"`
+	AuthKey		string              `json:"auth_key"`
+
 	listenAddr *net.TCPAddr     // The listen address, parsed.
 	certCaches []cfg.CertCacher // The certificate caches configured.
 }
