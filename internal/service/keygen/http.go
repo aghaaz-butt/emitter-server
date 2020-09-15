@@ -41,6 +41,7 @@ func (s *Service) HTTP() http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+	    fmt.Println(r.Proto + " Request From: " + r.RemoteAddr + "\tURL: " + r.URL.Path)
 		f := keygenForm{Sub: true}
 		switch r.Method {
 		case "GET":
@@ -89,7 +90,7 @@ type keygenForm struct {
 
 // perform type checking
 func (f *keygenForm) parse(req *http.Request) bool {
-
+    fmt.Println(req.Proto + " Request From: " + req.RemoteAddr + "\tURL: " + req.URL.Path)
 	var ok bool
 	var parsedOK = true
 

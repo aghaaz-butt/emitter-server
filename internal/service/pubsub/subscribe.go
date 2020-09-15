@@ -22,6 +22,7 @@ import (
 	"github.com/emitter-io/emitter/internal/security"
 	"github.com/emitter-io/emitter/internal/service"
 	"github.com/kelindar/binary/nocopy"
+	"fmt"
 )
 
 // Subscribe subscribes to a channel.
@@ -44,19 +45,24 @@ func (s *Service) OnSubscribe(c service.Conn, mqttTopic []byte) *errors.Error {
 	// Parse the channel
 	channel := security.ParseChannel(mqttTopic)
 	if channel.ChannelType == security.ChannelInvalid {
+	    fmt.Println(errors.ErrBadRequest)
 		return errors.ErrBadRequest
 	}
 
 	// Check the authorization and permissions
 	contract, key, allowed := s.auth.Authorize(channel, security.AllowRead)
 	if !allowed {
+	fmt.Println(errors.ErrUnauthorized)
 		return errors.ErrUnauthorized
 	}
 
+
 	// Keys which are supposed to be extended should not be used for subscribing
 	if key.HasPermission(security.AllowExtend) {
+	fmt.Println(errors.ErrUnauthorizedExt)
 		return errors.ErrUnauthorizedExt
 	}
+
 
 	// Subscribe the client to the channel
 	ssid := message.NewSsid(key.Contract(), channel.Query)
@@ -89,6 +95,8 @@ func (s *Service) OnSubscribe(c service.Conn, mqttTopic []byte) *errors.Error {
 			c.Send(&msg)
 		}
 	}
+
+	fmt.Println("Subscribed")
 
 	// Write the stats
 	c.Track(contract)

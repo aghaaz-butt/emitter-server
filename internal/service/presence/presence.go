@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/emitter-io/emitter/internal/errors"
 	"github.com/emitter-io/emitter/internal/event"
@@ -102,6 +103,7 @@ func (s *Service) OnRequest(c service.Conn, payload []byte) (service.Response, b
 
 // OnHTTP occurs when a new HTTP presence request is received.
 func (s *Service) OnHTTP(w http.ResponseWriter, r *http.Request) {
+    fmt.Println(r.Proto + " Request From: " + r.RemoteAddr + "\tURL: " + r.URL.Path)
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusNotFound)
 		return

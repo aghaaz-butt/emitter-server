@@ -24,6 +24,7 @@ import (
 	"github.com/emitter-io/emitter/internal/security"
 	"github.com/emitter-io/emitter/internal/service/fake"
 	"github.com/stretchr/testify/assert"
+	"fmt"
 )
 
 func TestPubSub_Subscribe(t *testing.T) {
@@ -109,6 +110,8 @@ func TestPubSub_Subscribe(t *testing.T) {
 		}
 
 		err := s.OnSubscribe(c, []byte(tc.topic))
+		fmt.Println("-----------")
+		fmt.Println(err)
 		assert.Equal(t, tc.success, err == nil)
 		assert.Equal(t, tc.expectLoaded, len(c.Outgoing))
 		assert.Equal(t, tc.expectCount, trie.Count())
@@ -150,6 +153,8 @@ func TestPubSub_Subscribe_Buggy(t *testing.T) {
 		}
 
 		err := s.OnSubscribe(c, []byte(tc.topic))
+		fmt.Println("-----------")
+        		fmt.Println(err)
 		assert.Equal(t, tc.success, err == nil)
 		assert.Equal(t, tc.expectLoaded, len(c.Outgoing))
 		assert.Equal(t, tc.expectCount, trie.Count())
