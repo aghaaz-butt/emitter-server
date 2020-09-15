@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/emitter-io/emitter/internal/errors"
 	"github.com/emitter-io/emitter/internal/event"
