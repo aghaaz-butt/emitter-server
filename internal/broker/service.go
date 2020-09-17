@@ -240,8 +240,9 @@ func (s *Service) Listen() (err error) {
 	// Block
 	logging.LogAction("service", "service started")
 
+	//Initialize Redis Server
+	InitializeRedis(s)
 	//Load all Groups from Data server
-
 	LoadGroups(s)
 
 	select {}
