@@ -4,18 +4,36 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/garyburd/redigo/redis"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
-
 //Load all Groups from Data server
 func LoadGroups(s *Service) {
 
-	apiServer	:= s.Config.ApiServer
-	secretKey	:= s.Config.SecretKey
-	authKey 	:= s.Config.AuthKey
+	apiServer			:= s.Config.ApiServer
+	secretKey			:= s.Config.SecretKey
+	authKey 			:= s.Config.AuthKey
+	redisServer			:= s.Config.RedisServer
+	redisServerPassword	:= s.Config.RedisServerPass
+
+
+	red, err := redis.Dial("tcp", redisServer)
+	if err != nil {
+		fmt.Println("Redis server is unavailable")
+	}
+
+	response, err := red.Do("AUTH", redisServerPassword )
+
+	if err != nil {
+		fmt.Println("Redis server is unavailable")
+		fmt.Println(err)
+	}
+
+	fmt.Println("Redis Server Connected! ", response)
+
 
 	BodyParams := make(map[string]interface{})
 	BodyParams["auth_token"] = authKey
@@ -32,12 +50,12 @@ func LoadGroups(s *Service) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if resp.Status != "200 OK" {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	var GroupsData map[string]interface{}
 	if err := json.Unmarshal(body, &GroupsData); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	if fmt.Sprintf("%v", GroupsData["status"]) != "200" {
@@ -68,11 +86,19 @@ func LoadGroups(s *Service) {
 
 	}
 
+	_, err  = redis.String(red.Do("GET", "GroupsDataJson"))
+	if err != nil {
+		red.Do("SET", "GroupsDataJson", GroupsDataJson)
+		fmt.Println("RedisGroupData not found")
+	} else {
+		fmt.Println("RedisGroupData exists: ")
+	}
+
+
 	BodyParams = make(map[string]interface{})
 	BodyParams["auth_token"] = authKey
 	BodyParams["groups_data"] = GroupsDataJson
 	jsonValue, _ = json.Marshal(BodyParams)
-	fmt.Println(GroupsDataJson)
 
 	req, err = http.NewRequest("POST", apiServer+"v2/UpdateEmitterChannelKeys", bytes.NewBuffer(jsonValue))
 	req.Header.Set("Content-Type", "application/json")
@@ -83,4 +109,5 @@ func LoadGroups(s *Service) {
 	}
 
 	defer resp.Body.Close()
+	defer red.Close()
 }
