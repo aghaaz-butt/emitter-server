@@ -10,9 +10,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-var redisClient redis.Conn
-var client http.Client
-
 type RedisObj struct {
 	Key       string
 	MembersID []string
@@ -22,16 +19,21 @@ type RedisObj struct {
 func InitializeRedis(s *Service) {
 
 	var err error
-	redisClient, err = redis.Dial("tcp", s.Config.RadiurServerIp)
+	s.RedisClient, err = redis.Dial("tcp", s.Config.RadiurServerIp)
 	if err != nil {
 		fmt.Println("Redis server is unavailable", err)
+		return
 	}
-	_, err = redisClient.Do("AUTH", s.Config.RadiurServerPassword)
+	_, err = s.RedisClient.Do("AUTH", s.Config.RadiurServerPassword)
 	if err != nil {
 		fmt.Println("Redis server is unavailable", err)
-	} else {
-		fmt.Println("Redis Server Connected!")
+		return
 	}
+
+	fmt.Println("Redis Server Connected!")
+	//Load all Groups from Data server
+	//LoadGroups(s)
+
 }
 
 //Load all Groups from Radius Server
@@ -39,38 +41,43 @@ func LoadGroups(s *Service) {
 
 	var GroupsDataJson []map[string]interface{}
 
-	keys, err := redis.Strings(redisClient.Do("KEYS", "*"))
+	keys, err := redis.Strings(s.RedisClient.Do("KEYS", "*"))
 	if err != nil {
 		// handle error
 	}
 
-	for _, radiusKey := range keys {
+	if len(keys) > 0 {
 
-		resp, err := redis.String(redisClient.Do("GET", radiusKey))
-		if err != nil {
-			// handle error
+		for _, radiusKey := range keys {
+
+			resp, err := redis.String(s.RedisClient.Do("GET", radiusKey))
+			if err != nil {
+				// handle error
+			}
+
+			var Group map[string]interface{}
+			json.Unmarshal([]byte(resp), &Group)
+			fmt.Println(Group)
+
+			var access uint8 = 123
+			key, err := s.keygen.CreateKey(s.Config.SecretKey, fmt.Sprintf("%v/", radiusKey), access, time.Unix(9999999999, 0))
+			if err != nil {
+				// handle error
+			}
+			fmt.Println("Channel created ", radiusKey)
+
+			if Group["key"] != key {
+
+				GroupDataJson := make(map[string]interface{})
+				GroupDataJson["group_id"] = radiusKey
+				GroupDataJson["channel_key"] = key
+
+				GroupsDataJson = append(GroupsDataJson, GroupDataJson)
+			}
 		}
 
-		fmt.Println(resp)
-		b := []byte(resp)
-		//student := &Student{}
-		group := make(map[string]interface{})
-		json.Unmarshal(b, group)
-		fmt.Println(group)
-
-		var access uint8 = 123
-
-		key, err := s.keygen.CreateKey(s.Config.SecretKey, fmt.Sprintf("%v/", radiusKey), access, time.Unix(9999999999, 0))
-		if err != nil {
-			fmt.Println("Error ", err)
-		}
-
-		GroupDataJson := make(map[string]interface{})
-		GroupDataJson["group_id"] = radiusKey
-		GroupDataJson["channel_key"] = key
-
-		GroupsDataJson = append(GroupsDataJson, GroupDataJson)
-
+	} else {
+		fmt.Println("Nothing found in Radius")
 	}
 
 	/*
@@ -79,7 +86,7 @@ func LoadGroups(s *Service) {
 		jsonValue, _ := json.Marshal(BodyParams)
 
 		req, err := http.NewRequest("POST", apiServer+"v2/GetAllGroups", bytes.NewBuffer(jsonValue))
-		req.Header.Set("Content-Type", "application/json")
+		req.Heades.Set("Content-Type", "application/json")
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -126,19 +133,48 @@ func LoadGroups(s *Service) {
 		}
 	*/
 
-	BodyParams := make(map[string]interface{})
-	BodyParams["auth_token"] = s.Config.AuthKey
-	BodyParams["groups_data"] = GroupsDataJson
-	jsonValue, _ := json.Marshal(BodyParams)
-	fmt.Println(GroupsDataJson)
+	if len(GroupsDataJson) > 0 {
 
-	req, err := http.NewRequest("POST", s.Config.ApiServer+"v2/UpdateEmitterChannelKeys", bytes.NewBuffer(jsonValue))
-	req.Header.Set("Content-Type", "application/json")
+		BodyParams := make(map[string]interface{})
+		BodyParams["auth_token"] = s.Config.AuthKey
+		BodyParams["groups_data"] = GroupsDataJson
+		jsonValue, _ := json.Marshal(BodyParams)
 
-	resp, err := client.Do(req)
+		req, err := http.NewRequest("POST", s.Config.ApiServer+"v2/UpdateEmitterChannelKeys", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := s.Client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+
+		defer resp.Body.Close()
+	}
+}
+
+//Authorize User
+func AuthorizeUser(Username string, s *Service) bool {
+
+	var UserMap map[string]string
+	json.Unmarshal([]byte(Username), &UserMap)
+	fmt.Println("---------------------------------------")
+	fmt.Println(UserMap)
+
+	resp, err := redis.String(s.RedisClient.Do("GET", "userid_"+UserMap["client_id"]))
 	if err != nil {
-		panic(err)
+		fmt.Println("Data not found on Radis")
+		return false
 	}
 
-	defer resp.Body.Close()
+	var RadisData map[string]string
+	json.Unmarshal([]byte(resp), &RadisData)
+	fmt.Println(RadisData)
+
+	fmt.Println("---------------------------------------")
+
+	if UserMap["token"] != RadisData["token"] {
+		return false
+	}
+
+	return true
 }

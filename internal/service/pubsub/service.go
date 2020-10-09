@@ -15,6 +15,7 @@
 package pubsub
 
 import (
+	"github.com/emitter-io/emitter/internal/config"
 	"github.com/emitter-io/emitter/internal/message"
 	"github.com/emitter-io/emitter/internal/provider/storage"
 	"github.com/emitter-io/emitter/internal/security/hash"
@@ -28,16 +29,18 @@ type Service struct {
 	notifier service.Notifier           // The notifier to use.
 	trie     *message.Trie              // The subscription matching trie.
 	handlers map[uint32]service.Handler // The emitter request handlers.
+	Config   *config.Config             // The configuration for the service.
 }
 
 // New creates a new publisher service.
-func New(auth service.Authorizer, store storage.Storage, notifier service.Notifier, trie *message.Trie) *Service {
+func New(auth service.Authorizer, store storage.Storage, notifier service.Notifier, trie *message.Trie, config *config.Config) *Service {
 	return &Service{
 		auth:     auth,
 		store:    store,
 		notifier: notifier,
 		trie:     trie,
 		handlers: make(map[uint32]service.Handler),
+		Config:   config,
 	}
 }
 

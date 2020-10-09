@@ -16,6 +16,8 @@ package pubsub
 
 import (
 	"encoding/json"
+	"fmt"
+
 	"github.com/emitter-io/emitter/internal/errors"
 	"github.com/emitter-io/emitter/internal/message"
 	"github.com/emitter-io/emitter/internal/network/mqtt"
@@ -25,6 +27,7 @@ import (
 
 // Publish publishes a message to everyone and returns the number of outgoing bytes written.
 func (s *Service) Publish(m *message.Message, filter func(message.Subscriber) bool) (n int64) {
+
 	size := m.Size()
 	for _, subscriber := range s.trie.Lookup(m.Ssid(), filter) {
 		subscriber.Send(m)
@@ -104,6 +107,11 @@ func (s *Service) OnPublish(c service.Conn, packet *mqtt.Publish) *errors.Error 
 	c.Track(contract)
 	contract.Stats().AddIngress(int64(len(packet.Payload)))
 	contract.Stats().AddEgress(size)
+
+	fmt.Println(string(packet.Payload))
+
+	fmt.Println("Msg Sent")
+
 	return nil
 }
 
