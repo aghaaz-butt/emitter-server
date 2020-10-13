@@ -15,11 +15,12 @@
 package keygen
 
 import (
-	"crypto/rand"
+	//"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math"
+	//"math"
 	"math/big"
+	"strconv"
 	"strings"
 	"time"
 
@@ -123,10 +124,16 @@ func (s *Service) CreateKey(rawMasterKey, channel string, access uint8, expires 
 	}
 
 	// Generate random salt
-	n, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt16))
-	if err != nil {
-		return "", errors.ErrServerError
-	}
+	/*
+		_, err = rand.Int(rand.Reader, big.NewInt(math.MaxInt16))
+		if err != nil {
+			return "", errors.ErrServerError
+		}
+	*/
+	var n *big.Int
+	n = new(big.Int)
+	i, err := strconv.ParseUint(channel, 10, 64)
+	n.SetUint64(i)
 
 	// Create a key request
 	key := security.Key(make([]byte, 24))
@@ -135,7 +142,7 @@ func (s *Service) CreateKey(rawMasterKey, channel string, access uint8, expires 
 	key.SetContract(masterKey.Contract())
 	key.SetSignature(masterKey.Signature())
 	key.SetPermissions(access)
-	key.SetExpires(expires)
+	//key.SetExpires(expires)
 
 	// Make sure we don't accidentally generate master keys
 	key.SetPermission(security.AllowMaster, false)

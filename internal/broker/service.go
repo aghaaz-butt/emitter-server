@@ -51,6 +51,7 @@ import (
 	"github.com/emitter-io/emitter/internal/service/pubsub"
 	"github.com/emitter-io/emitter/internal/service/survey"
 	"github.com/emitter-io/stats"
+	"github.com/garyburd/redigo/redis"
 	"github.com/kelindar/tcp"
 )
 
@@ -74,6 +75,8 @@ type Service struct {
 	pubsub        *pubsub.Service    // The publish/subscribe service.
 	presence      *presence.Service  // The presence service.
 	keygen        *keygen.Service    // The key generation provider.
+	RedisClient   redis.Conn
+	Client        http.Client
 }
 
 // NewService creates a new service.
@@ -123,7 +126,7 @@ func NewService(ctx context.Context, cfg *config.Config) (s *Service, err error)
 	logging.LogTarget("service", "configured contracts provider", s.contracts.Name())
 
 	// Attach the pubsub service
-	s.pubsub = pubsub.New(s, s.storage, s, s.subscriptions)
+	s.pubsub = pubsub.New(s, s.storage, s, s.subscriptions, s.Config)
 
 	// Load the monitor storage provider
 	nodeName := address.Fingerprint(s.ID()).String()
@@ -240,9 +243,8 @@ func (s *Service) Listen() (err error) {
 	// Block
 	logging.LogAction("service", "service started")
 
-	//Load all Groups from Data server
-
-	LoadGroups(s)
+	//Initialize Redis Server
+	InitializeRedis(s)
 
 	select {}
 }
@@ -317,7 +319,7 @@ func (s *Service) NotifyUnsubscribe(sub message.Subscriber, ev *event.Subscripti
 // Occurs when a new client connection is accepted.
 func (s *Service) onAcceptConn(t net.Conn) {
 	conn := s.newConn(t, s.Config.Limit.ReadRate)
-	go conn.Process()
+	go conn.Process(s)
 }
 
 // Occurs when a new HTTP request is received.

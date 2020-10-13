@@ -97,11 +97,11 @@ type Config struct {
 	Dynamo     secretStoreConfig   `json:"dynamodb,omitempty"` // The configuration for the AWS DynamoDB Secret Store.
 
 	// Defining New Attributes in emitter.conf
-	ApiServer		string			`json:"api_server"`
-	SecretKey		string			`json:"secret_key"`
-	AuthKey			string			`json:"auth_key"`
-	RedisServer		string          `json:"redis_server"`
-	RedisServerPass	string			`json:"redis_server_password"`
+	ApiServer            string `json:"api_server"`
+	SecretKey            string `json:"secret_key"`
+	AuthKey              string `json:"auth_key"`
+	RadiurServerIp       string `json:"radius_server"`
+	RadiurServerPassword string `json:"radius_server_password"`
 
 	listenAddr *net.TCPAddr     // The listen address, parsed.
 	certCaches []cfg.CertCacher // The certificate caches configured.

@@ -158,7 +158,7 @@ func (c *Conn) Decrement(ssid message.Ssid) bool {
 }
 
 // Process processes the messages.
-func (c *Conn) Process() error {
+func (c *Conn) Process(s *Service) error {
 	defer c.Close()
 	reader := bufio.NewReaderSize(c.socket, 65536)
 	maxSize := c.service.Config.MaxMessageBytes()
@@ -177,21 +177,21 @@ func (c *Conn) Process() error {
 		}
 
 		// Handle the receive
-		if err := c.onReceive(msg); err != nil {
+		if err := c.onReceive(msg, s); err != nil {
 			return err
 		}
 	}
 }
 
 // onReceive handles an MQTT receive.
-func (c *Conn) onReceive(msg mqtt.Message) error {
+func (c *Conn) onReceive(msg mqtt.Message, s *Service) error {
 	defer c.MeasureElapsed("rcv."+msg.String(), time.Now())
 	switch msg.Type() {
 
 	// We got an attempt to connect to MQTT.
 	case mqtt.TypeOfConnect:
 		var result uint8
-		if !c.onConnect(msg.(*mqtt.Connect)) {
+		if !c.onConnect(msg.(*mqtt.Connect), s) {
 			result = 0x05 // Unauthorized
 		}
 
@@ -326,7 +326,7 @@ func (c *Conn) CanUnsubscribe(ssid message.Ssid, channel []byte) bool {
 }
 
 // onConnect handles the connection authorization
-func (c *Conn) onConnect(packet *mqtt.Connect) bool {
+func (c *Conn) onConnect(packet *mqtt.Connect, s *Service) bool {
 	c.username = string(packet.Username)
 	c.connect = &event.Connection{
 		Peer:        c.service.ID(),
@@ -343,11 +343,20 @@ func (c *Conn) onConnect(packet *mqtt.Connect) bool {
 	if c.service.cluster != nil {
 		c.service.cluster.Notify(c.connect, true)
 	}
+
+	status := AuthorizeUser(c.username, s)
+
+	if status == false {
+		//return false
+		return true
+	}
+
 	return true
 }
 
 // Close terminates the connection.
 func (c *Conn) Close() error {
+
 	atomic.AddInt64(&c.service.connections, -1)
 	if r := recover(); r != nil {
 		logging.LogAction("closing", fmt.Sprintf("panic recovered: %s \n %s", r, debug.Stack()))
@@ -364,6 +373,9 @@ func (c *Conn) Close() error {
 			Channel: counter.Channel,
 		})
 	}
+
+	fmt.Println("Socket Disconnect")
+	fmt.Println(nocopy.String(c.Username()))
 
 	// Publish last will
 	c.service.pubsub.OnLastWill(c, c.connect)

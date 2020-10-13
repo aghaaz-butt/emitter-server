@@ -15,6 +15,8 @@
 package pubsub
 
 import (
+	"fmt"
+
 	"github.com/emitter-io/emitter/internal/errors"
 	"github.com/emitter-io/emitter/internal/event"
 	"github.com/emitter-io/emitter/internal/message"
@@ -22,7 +24,6 @@ import (
 	"github.com/emitter-io/emitter/internal/security"
 	"github.com/emitter-io/emitter/internal/service"
 	"github.com/kelindar/binary/nocopy"
-	"fmt"
 )
 
 // Subscribe subscribes to a channel.
@@ -45,24 +46,22 @@ func (s *Service) OnSubscribe(c service.Conn, mqttTopic []byte) *errors.Error {
 	// Parse the channel
 	channel := security.ParseChannel(mqttTopic)
 	if channel.ChannelType == security.ChannelInvalid {
-	    fmt.Println(errors.ErrBadRequest)
+		fmt.Println(errors.ErrBadRequest)
 		return errors.ErrBadRequest
 	}
 
 	// Check the authorization and permissions
 	contract, key, allowed := s.auth.Authorize(channel, security.AllowRead)
 	if !allowed {
-	fmt.Println(errors.ErrUnauthorized)
+		fmt.Println(errors.ErrUnauthorized)
 		return errors.ErrUnauthorized
 	}
 
-
 	// Keys which are supposed to be extended should not be used for subscribing
 	if key.HasPermission(security.AllowExtend) {
-	fmt.Println(errors.ErrUnauthorizedExt)
+		fmt.Println(errors.ErrUnauthorizedExt)
 		return errors.ErrUnauthorizedExt
 	}
-
 
 	// Subscribe the client to the channel
 	ssid := message.NewSsid(key.Contract(), channel.Query)
@@ -97,8 +96,37 @@ func (s *Service) OnSubscribe(c service.Conn, mqttTopic []byte) *errors.Error {
 	}
 
 	fmt.Println("Subscribed")
+	//UpdateRadis(s, fmt.Sprintf("%s", channel))
 
 	// Write the stats
 	c.Track(contract)
 	return nil
 }
+
+/*
+func UpdateRadis(s *Service, channel string) {
+
+	ChannelArray := strings.Split(channel, "/")
+
+	RedisClient, err := redis.Dial("tcp", s.Config.RadiurServerIp)
+	if err != nil {
+		fmt.Println("Redis server is unavailable", err)
+		return
+	}
+	_, err = RedisClient.Do("AUTH", s.Config.RadiurServerPassword)
+	if err != nil {
+		fmt.Println("Redis server is unavailable", err)
+		return
+	}
+
+	resp, err := redis.String(RedisClient.Do("GET", ChannelArray[1]))
+	if err != nil {
+		// handle error
+	}
+
+	var Group map[string]interface{}
+	json.Unmarshal([]byte(resp), &Group)
+	fmt.Println(Group)
+
+}
+*/
