@@ -18,6 +18,7 @@ import (
 	//"crypto/rand"
 	"encoding/json"
 	"fmt"
+
 	//"math"
 	"math/big"
 	"strconv"
@@ -164,6 +165,8 @@ func (s *Service) CreateKey(rawMasterKey, channel string, access uint8, expires 
 	if err != nil {
 		return "", errors.ErrServerError
 	}
+
+	fmt.Println("Channel Created: " + channel)
 
 	return out, nil
 }
