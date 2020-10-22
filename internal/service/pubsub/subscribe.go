@@ -95,7 +95,8 @@ func (s *Service) OnSubscribe(c service.Conn, mqttTopic []byte) *errors.Error {
 		}
 	}
 
-	fmt.Println("Subscribed")
+	fmt.Println("Subscribed to channel")
+	fmt.Println(channel)
 	//UpdateRadis(s, fmt.Sprintf("%s", channel))
 
 	// Write the stats

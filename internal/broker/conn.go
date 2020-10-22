@@ -160,6 +160,7 @@ func (c *Conn) Decrement(ssid message.Ssid) bool {
 // Process processes the messages.
 func (c *Conn) Process(s *Service) error {
 	defer c.Close()
+
 	reader := bufio.NewReaderSize(c.socket, 65536)
 	maxSize := c.service.Config.MaxMessageBytes()
 	for {
@@ -211,6 +212,7 @@ func (c *Conn) onReceive(msg mqtt.Message, s *Service) error {
 
 		// Subscribe for each subscription
 		for _, sub := range packet.Subscriptions {
+
 			if err := c.service.pubsub.OnSubscribe(c, sub.Topic); err != nil {
 				ack.Qos = append(ack.Qos, 0x80) // 0x80 indicate subscription failure
 				c.notifyError(err, packet.MessageID)
