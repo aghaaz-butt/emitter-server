@@ -105,11 +105,11 @@ func (c *Conn) Username() string {
 	return c.username
 }
 
-// Username returns the associated username.
-func (c *Conn) UpdateUserName() string {
-	c.username = "Uzairist"
-	return c.username
-}
+//// Username returns the associated username.
+//func (c *Conn) UpdateUserName() string {
+//	c.username = "Uzairist"
+//	return c.username
+//}
 
 // Addition of new attribute while creating connection
 // Capability returns the associated capability.
