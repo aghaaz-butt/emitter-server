@@ -129,6 +129,8 @@ type Connection struct {
 	WillMessage []byte
 	ClientID    []byte
 	Username    []byte
+	// Addition of new attribute while creating connection
+	Capability    []byte
 }
 
 // Type retuns the unit type.

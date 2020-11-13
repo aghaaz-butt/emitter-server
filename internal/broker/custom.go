@@ -159,6 +159,9 @@ func AuthorizeUser(Username string, s *Service) bool {
 	json.Unmarshal([]byte(Username), &UserMap)
 	fmt.Println("---------------------------------------")
 	fmt.Println(UserMap)
+	fmt.Println("===============")
+	fmt.Println(Username)
+	fmt.Println("===============")
 
 	resp, err := redis.String(s.RedisClient.Do("GET", "userid_"+UserMap["client_id"]))
 	if err != nil {

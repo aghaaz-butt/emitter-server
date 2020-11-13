@@ -60,6 +60,8 @@ type Conn struct {
 	connect  *event.Connection // The associated connection event.
 	username string            // The username provided by the client during MQTT connect.
 	links    map[string]string // The map of all pre-authorized links.
+	// Addition of new attribute while creating connection
+	capability string
 }
 
 // NewConn creates a new connection.
@@ -101,6 +103,18 @@ func (c *Conn) LocalID() security.ID {
 // Username returns the associated username.
 func (c *Conn) Username() string {
 	return c.username
+}
+
+// Username returns the associated username.
+func (c *Conn) UpdateUserName() string {
+	c.username = "Uzairist"
+	return c.username
+}
+
+// Addition of new attribute while creating connection
+// Capability returns the associated capability.
+func (c *Conn) Capability() string {
+	return c.capability
 }
 
 // GetLink checks if the topic is a registered shortcut and expands it.
@@ -329,6 +343,13 @@ func (c *Conn) CanUnsubscribe(ssid message.Ssid, channel []byte) bool {
 
 // onConnect handles the connection authorization
 func (c *Conn) onConnect(packet *mqtt.Connect, s *Service) bool {
+
+	fmt.Println("Connect Establish")
+
+	// Addition of new attribute while creating connection
+	// setting capability
+	c.capability = string(packet.Capability)
+
 	c.username = string(packet.Username)
 	c.connect = &event.Connection{
 		Peer:        c.service.ID(),
@@ -340,6 +361,8 @@ func (c *Conn) onConnect(packet *mqtt.Connect, s *Service) bool {
 		WillMessage: packet.WillMessage,
 		ClientID:    packet.ClientID,
 		Username:    packet.Username,
+		// Addition of new attribute while creating connection
+		Capability:  packet.Capability,
 	}
 
 	if c.service.cluster != nil {
@@ -347,6 +370,11 @@ func (c *Conn) onConnect(packet *mqtt.Connect, s *Service) bool {
 	}
 
 	status := AuthorizeUser(c.username, s)
+
+	fmt.Println("connection information")
+	fmt.Println(c.username)
+	fmt.Println(c.capability)
+	fmt.Println("---------------------")
 
 	if status == false {
 		//return false

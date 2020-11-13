@@ -90,6 +90,8 @@ func (s *Service) OnRequest(c service.Conn, payload []byte) (service.Response, b
 
 		// Gather local & cluster presence
 		who = append(who, s.getAllPresence(ssid)...)
+		fmt.Println("Presence List")
+		fmt.Println(who)
 		return &Response{
 			Time:    now,
 			Event:   EventTypeStatus,
@@ -98,7 +100,6 @@ func (s *Service) OnRequest(c service.Conn, payload []byte) (service.Response, b
 		}, true
 	}
 
-	fmt.Println("presence")
 
 	return nil, true
 }

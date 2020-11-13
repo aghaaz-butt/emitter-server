@@ -131,6 +131,10 @@ func (s *Service) onEmitterRequest(c service.Conn, channel *security.Channel, pa
 			resp, ok = handle(c, payload)
 		}
 	}
+	fmt.Println("\n\n---------------------")
+	fmt.Println("onEmitterRequest")
+	fmt.Println(string(payload[:]))
+	fmt.Println("---------------------\n\n")
 	return
 }
 

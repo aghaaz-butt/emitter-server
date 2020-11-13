@@ -84,6 +84,8 @@ type Connect struct {
 	WillMessage    []byte
 	Username       []byte
 	Password       []byte
+	// Addition of new attribute while creating connection
+	Capability     []byte
 }
 
 // Connack represents an MQTT connack packet.
@@ -261,6 +263,8 @@ func (c *Connect) EncodeTo(w io.Writer) (int, error) {
 	offset += writeUint8(buf[offset:], flagByte)
 	offset += writeUint16(buf[offset:], c.KeepAlive)
 	offset += writeString(buf[offset:], c.ClientID)
+
+	//offset += writeString(buf[offset:], c.Capability)
 
 	if c.WillFlag {
 		offset += writeString(buf[offset:], c.WillTopic)
@@ -684,6 +688,12 @@ func decodeConnect(data []byte) (Message, error) {
 			return nil, err
 		}
 	}
+
+	// Addition of new attribute while creating connection
+	if connect.Capability, err = readString(data, &bookmark); err != nil {
+		return nil, err
+	}
+
 	return connect, nil
 }
 
