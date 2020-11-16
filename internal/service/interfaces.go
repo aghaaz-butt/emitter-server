@@ -62,7 +62,7 @@ type Conn interface {
 	CanUnsubscribe(message.Ssid, []byte) bool
 	LocalID() security.ID
 	Username() string
-	UpdateUserName() string
+	//UpdateUserName() string
 	Track(contract.Contract)
 	Links() map[string]string
 	GetLink([]byte) []byte

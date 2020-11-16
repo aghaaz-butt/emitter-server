@@ -690,10 +690,9 @@ func decodeConnect(data []byte) (Message, error) {
 	}
 
 	// Addition of new attribute while creating connection
-	if connect.Capability, err = readString(data, &bookmark); err != nil {
-		return nil, err
-	}
-
+	//if connect.Capability, err = readString(data, &bookmark); err != nil {
+	//	return nil, err
+	//}
 	return connect, nil
 }
 
