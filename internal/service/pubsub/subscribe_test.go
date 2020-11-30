@@ -25,6 +25,7 @@ import (
 	"github.com/emitter-io/emitter/internal/service/fake"
 	"github.com/stretchr/testify/assert"
 	"fmt"
+	cfg "github.com/emitter-io/emitter/internal/config"
 )
 
 func TestPubSub_Subscribe(t *testing.T) {
@@ -92,9 +93,11 @@ func TestPubSub_Subscribe(t *testing.T) {
 			Success:   tc.contract != 0,
 			ExtraPerm: tc.extraPerm,
 		}
+		con := &cfg.Config{ListenAddr: ":8080"}
+
 
 		// Create new service
-		s := New(auth, store, notify, trie)
+		s := New(auth, store, notify, trie, con)
 		c := &fake.Conn{
 			Disabled: tc.disabled,
 		}
@@ -147,7 +150,8 @@ func TestPubSub_Subscribe_Buggy(t *testing.T) {
 		}
 
 		// Create new service
-		s := New(auth, new(buggyStore), new(fake.Notifier), trie)
+		con := &cfg.Config{ListenAddr: ":8080"}
+		s := New(auth, new(buggyStore), new(fake.Notifier), trie, con)
 		c := &fake.Conn{
 			Disabled: tc.disabled,
 		}

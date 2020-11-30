@@ -24,6 +24,7 @@ import (
 	"github.com/emitter-io/emitter/internal/service/fake"
 	"github.com/kelindar/binary/nocopy"
 	"github.com/stretchr/testify/assert"
+	cfg "github.com/emitter-io/emitter/internal/config"
 )
 
 func TestPubSub_Unsubscribe(t *testing.T) {
@@ -76,8 +77,10 @@ func TestPubSub_Unsubscribe(t *testing.T) {
 			ExtraPerm: tc.extraPerm,
 		}
 
+		c := &cfg.Config{ListenAddr: ":8080"}
+
 		// Create new service
-		s := New(auth, storage.NewNoop(), new(fake.Notifier), trie)
+		s := New(auth, storage.NewNoop(), new(fake.Notifier), trie, c)
 
 		// Register few subscribers
 		for i := 0; i < 10; i++ {

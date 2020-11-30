@@ -346,7 +346,11 @@ func (c *Conn) onConnect(packet *mqtt.Connect, s *Service) bool {
 		c.service.cluster.Notify(c.connect, true)
 	}
 
-	status := AuthorizeUser(c.username, s)
+	status := false
+	if(c.username != "") {
+		status = AuthorizeUser(c.username, s)
+	}
+
 
 	if status == false {
 		//return false

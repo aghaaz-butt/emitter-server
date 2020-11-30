@@ -25,6 +25,7 @@ import (
 	"github.com/emitter-io/emitter/internal/service/fake"
 	"github.com/kelindar/binary/nocopy"
 	"github.com/stretchr/testify/assert"
+	cfg "github.com/emitter-io/emitter/internal/config"
 )
 
 func TestPubSub_LastWill(t *testing.T) {
@@ -116,7 +117,8 @@ func TestPubSub_LastWill(t *testing.T) {
 		}
 
 		// Issue a request
-		s := New(auth, store, notify, trie)
+		con := &cfg.Config{ListenAddr: ":8080"}
+		s := New(auth, store, notify, trie, con)
 		sub := new(fake.Conn)
 		s.Subscribe(sub, &event.Subscription{
 			Peer:    2,

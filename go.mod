@@ -12,6 +12,7 @@ require (
 	github.com/emitter-io/address v1.0.0
 	github.com/emitter-io/config v1.0.0
 	github.com/emitter-io/stats v1.0.3
+	github.com/garyburd/redigo v1.6.2
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/golang/snappy v0.0.1
 	github.com/gorilla/websocket v1.4.2
