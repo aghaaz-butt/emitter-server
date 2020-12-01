@@ -59,11 +59,6 @@ func (c *conn) RemoteAddr() net.Addr               { return &net.IPAddr{} }
 func (c *conn) SetReadDeadline(t time.Time) error  { return nil }
 func (c *conn) SetWriteDeadline(t time.Time) error { return nil }
 
-func TestTryUpgradeNil(t *testing.T) {
-	_, ok := TryUpgrade(nil, nil)
-	assert.Equal(t, false, ok)
-}
-
 func TestTryUpgrade(t *testing.T) {
 	//httptest.NewServer(handler)
 	r := httptest.NewRequest("GET", "http://127.0.0.1/", bytes.NewBuffer([]byte{}))
