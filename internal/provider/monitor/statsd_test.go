@@ -54,7 +54,7 @@ func TestStatsd_BadSnapshot(t *testing.T) {
 
 	err := s.Configure(map[string]interface{}{
 		"interval": 1000000.00,
-		"url":      ":8125",
+		"url":      "127.0.0.53:53",
 	})
 	assert.NoError(t, err)
 	assert.NotPanics(t, func() {
@@ -73,7 +73,9 @@ func TestStatsd_Configure(t *testing.T) {
 		defer s.Close()
 		assert.Equal(t, "statsd", s.Name())
 
-		err := s.Configure(nil)
+		err := s.Configure(map[string]interface{}{
+			"url":      "127.0.0.53:53",
+		})
 		assert.NoError(t, err)
 	}
 
@@ -82,7 +84,9 @@ func TestStatsd_Configure(t *testing.T) {
 		defer s.Close()
 		assert.Equal(t, "statsd", s.Name())
 
-		err := s.Configure(map[string]interface{}{})
+		err := s.Configure(map[string]interface{}{
+			"url":      "127.0.0.53:53",
+		})
 		assert.NoError(t, err)
 	}
 
@@ -93,7 +97,7 @@ func TestStatsd_Configure(t *testing.T) {
 
 		err := s.Configure(map[string]interface{}{
 			"interval": 100.00,
-			"url":      ":8125",
+			"url":      "127.0.0.53:53",
 		})
 		assert.NoError(t, err)
 	}
