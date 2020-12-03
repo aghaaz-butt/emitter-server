@@ -368,7 +368,6 @@ func (c *Conn) Close() error {
 		logging.LogAction("closing", fmt.Sprintf("panic recovered: %s \n %s", r, debug.Stack()))
 	}
 
-
 	// Unsubscribe from everything, no need to lock since each Unsubscribe is
 	// already locked. Locking the 'Close()' would result in a deadlock.
 	for _, counter := range c.subs.All() {
