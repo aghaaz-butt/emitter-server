@@ -1,63 +1,63 @@
+// https://itnext.io/golang-testing-mocking-redis-b48d09386c70
+
 package broker
 
 import (
-	"fmt"
-	"github.com/garyburd/redigo/redis"
+	"github.com/elliotchance/redismock"
 	"github.com/stretchr/testify/assert"
-	"math/rand"
-	"strconv"
+	"log"
+	"os"
 	"testing"
-	cfg "github.com/emitter-io/emitter/internal/config"
+	"time"
 
+	"github.com/alicebob/miniredis"
+	"github.com/go-redis/redis"
 )
 
-var redisClient redis.Conn
+var (
+	client *redis.Client
+)
 
+var (
+	key = "key"
+	val = "val"
+)
 
 //InitializeRedisCache connect redis server
+func TestMain(m *testing.M) {
+	mr, err := miniredis.Run()
+	if err != nil {
+		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	client = redis.NewClient(&redis.Options{
+		Addr: mr.Addr(),
+	})
+
+	code := m.Run()
+	os.Exit(code)
+}
+
+//Set dummy value in redis for time.Duration(0)
 func TestInitializeRedis(t *testing.T) {
+	exp := time.Duration(0)
 
-	var err error
-	c := &cfg.Config{RadiurServerIp: "51.68.162.55:6379",
-		RadiurServerPassword: "Mch%5$$3)83Kdh1!a",}
+	mock := redismock.NewNiceMock(client)
+	r := NewRedisRepository(mock)
 
-	// checking redis connection
-	redisClient, err = redis.Dial("tcp", c.RadiurServerIp)
-	if err != nil {
-		fmt.Println("Redis server is unavailable", err)
-		assert.Nil(t, err)
-	}
-	assert.Nil(t, err)
-
-	// checking redisClient with password
-	_, err = redisClient.Do("AUTH", c.RadiurServerPassword)
-	if err != nil {
-		fmt.Println("Password of redis is incorrect", err)
-		assert.Nil(t, err)
-	}
-	assert.Nil(t, err)
+	mock.On("Set", key, val, exp).Return(redis.NewStatusResult("", nil))
+	err := r.Set(key, val, exp)
+	assert.NoError(t, err)
 
 }
 
-//InitializeRedisCache connect redis server
-func TestAuthorizeUser(t *testing.T) {
+// Get value against assigned key
+func TesAuthorizeUser(t *testing.T) {
+	mock := redismock.NewNiceMock(client)
+	r := NewRedisRepository(mock)
 
-	// generating random number string
-	randonNumber := strconv.Itoa(rand.Intn(10000))
-
-	// updating random number string in redis
-	redisClient.Do("SET",  randonNumber + "_user_id_" + randonNumber, randonNumber)
-
-	// getting random number string from redis
-	resp, err := redis.String(redisClient.Do("GET", randonNumber + "_user_id_" + randonNumber))
-	if err != nil {
-		fmt.Println("user isn't available in redis", err)
-		assert.Nil(t, err)
-	}
-
-	// checking random number string
-	assert.Equal(t, randonNumber, resp, "user is available in redis")
-
-	// remove random value from redis
-	redisClient.Do("SET",  randonNumber + "_user_id_" + randonNumber, "")
+	mock.On("Get", key).Return(redis.NewStringResult(val, nil))
+	res, err := r.Get(key)
+	assert.NoError(t, err)
+	assert.Equal(t, val, res)
 }
