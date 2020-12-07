@@ -23,5 +23,5 @@ import (
 func Test_Response(t *testing.T) {
 	res := new(Response)
 	res.ForRequest(1)
-	assert.Equal(t, 1, int(res.Request))
+	assert.Equal(t, 1, int(res.Obj.Request))
 }

@@ -4,17 +4,22 @@ go 1.14
 
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
+	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
+	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/aws/aws-sdk-go v1.31.4 // indirect
 	github.com/axiomhq/hyperloglog v0.0.0-20191112132149-a4c4c47bc57f
 	github.com/coocood/freecache v1.1.0
 	github.com/dgraph-io/badger v1.6.1
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
+	github.com/elliotchance/redismock v1.5.3
 	github.com/emitter-io/address v1.0.0
 	github.com/emitter-io/config v1.0.0
 	github.com/emitter-io/stats v1.0.3
 	github.com/garyburd/redigo v1.6.2
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/golang/snappy v0.0.1
+	github.com/gomodule/redigo v1.8.3 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jawher/mow.cli v1.1.0
 	github.com/kelindar/binary v1.0.9
@@ -29,6 +34,7 @@ require (
 	github.com/tidwall/pretty v1.0.1 // indirect
 	github.com/valyala/fasthttp v1.12.0
 	github.com/weaveworks/mesh v0.0.0-20191105120815-58dbcc3e8e63
+	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/tools v0.0.0-20201202100533-7534955ac86b // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0
