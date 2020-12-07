@@ -43,17 +43,24 @@ const (
 // ------------------------------------------------------------------------------------
 
 // Response represents a state notification.
+//type Response struct {
+//	Request uint16    `json:"req,omitempty"` // The corresponding request ID.
+//	Time    int64     `json:"time"`          // The UNIX timestamp.
+//	Event   EventType `json:"event"`         // The event, must be "status", "subscribe" or "unsubscribe".
+//	Channel string    `json:"channel"`       // The target channel for the notification.
+//	Who     []Info    `json:"who"`           // The subscriber ids.
+//	Type 	string   `json:"type"`
+//}
+
+// Response represents a state notification.
 type Response struct {
-	Request uint16    `json:"req,omitempty"` // The corresponding request ID.
-	Time    int64     `json:"time"`          // The UNIX timestamp.
-	Event   EventType `json:"event"`         // The event, must be "status", "subscribe" or "unsubscribe".
-	Channel string    `json:"channel"`       // The target channel for the notification.
-	Who     []Info    `json:"who"`           // The subscriber ids.
+	Type 	string   `json:"type"`
+	Obj		NewRequest `json:"obj"`
 }
 
 // ForRequest sets the request ID in the response for matching
 func (r *Response) ForRequest(id uint16) {
-	r.Request = id
+	r.Obj.Request = id
 }
 
 // ------------------------------------------------------------------------------------
@@ -64,29 +71,66 @@ type Info struct {
 	Username string `json:"username,omitempty"` // The subscriber username set by client ID.
 }
 
-// ------------------------------------------------------------------------------------
-
-// Notification represents a state notification.
-type Notification struct {
+type NewInfo struct {
 	Time    int64                         `json:"time"`    // The UNIX timestamp.
 	Event   EventType                     `json:"event"`   // The event, must be "status", "subscribe" or "unsubscribe".
 	Channel string                        `json:"channel"` // The target channel for the notification.
-	Who     Info                          `json:"who"`     // The subscriber id.
+	//Who     Info                          `json:"who"`     // The subscriber id.
+	Who     []Info						  `json:"who"`
 	Ssid    message.Ssid                  `json:"-"`       // The ssid to dispatch the notification on.
 	filter  func(message.Subscriber) bool // The filter function (optional)
 }
 
+type NewRequest struct {
+	Request uint16    `json:"req,omitempty"` // The corresponding request ID.
+	Time    int64     `json:"time"`          // The UNIX timestamp.
+	Event   EventType `json:"event"`         // The event, must be "status", "subscribe" or "unsubscribe".
+	Channel string    `json:"channel"`       // The target channel for the notification.
+	Who     []Info    `json:"who"`           // The subscriber ids.
+}
+
+// ------------------------------------------------------------------------------------
+
+// Notification represents a state notification.
+//type Notification struct {
+//	Type    string                        `json:"type"`    // The UNIX timestamp.
+//	Time    int64                         `json:"time"`    // The UNIX timestamp.
+//	Event   EventType                     `json:"event"`   // The event, must be "status", "subscribe" or "unsubscribe".
+//	Channel string                        `json:"channel"` // The target channel for the notification.
+//	Who     Info                          `json:"who"`     // The subscriber id.
+//	//Who     []Info						  `json:"who"`
+//	Ssid    message.Ssid                  `json:"-"`       // The ssid to dispatch the notification on.
+//	filter  func(message.Subscriber) bool // The filter function (optional)
+//}
+
+// Notification represents a state notification.
+type Notification struct {
+	Type    string                        `json:"type"`    // The UNIX timestamp.
+	Obj		NewInfo					  	  `json:"obj"`
+}
+
 // newNotification creates a new notification payload.
 func newNotification(event EventType, ev *event.Subscription, filter func(message.Subscriber) bool) *Notification {
+
+	who := make([]Info, 0, 4)
+	who = append(who, Info{
+		ID:       ev.ConnID(),
+		Username: string(ev.User),
+	})
+
 	return &Notification{
-		filter:  filter,
-		Ssid:    message.NewSsidForPresence(ev.Ssid),
-		Time:    time.Now().UTC().Unix(),
-		Event:   event,
-		Channel: string(ev.Channel),
-		Who: Info{
-			ID:       ev.ConnID(),
-			Username: string(ev.User),
+		Type:  "presence",
+		Obj: NewInfo{
+			filter:  filter,
+			Ssid:    message.NewSsidForPresence(ev.Ssid),
+			Time:    time.Now().UTC().Unix(),
+			Event:   event,
+			Channel: string(ev.Channel),
+			Who: who,
+			//Who: Info{
+			//	ID:       ev.ConnID(),
+			//	Username: string(ev.User),
+			//},
 		},
 	}
 }

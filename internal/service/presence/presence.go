@@ -91,10 +91,13 @@ func (s *Service) OnRequest(c service.Conn, payload []byte) (service.Response, b
 		// Gather local & cluster presence
 		who = append(who, s.getAllPresence(ssid)...)
 		return &Response{
-			Time:    now,
-			Event:   EventTypeStatus,
-			Channel: msg.Channel,
-			Who:     who,
+			Type:	"presence",
+			Obj: NewRequest{
+				Time:    now,
+				Event:   EventTypeStatus,
+				Channel: msg.Channel,
+				Who:     who,
+			},
 		}, true
 	}
 
@@ -145,10 +148,13 @@ func (s *Service) OnHTTP(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().UTC().Unix()
 	who := s.getAllPresence(ssid)
 	resp, _ := json.Marshal(&Response{
-		Time:    now,
-		Event:   EventTypeStatus,
-		Channel: msg.Channel,
-		Who:     who,
+		Type: "presence",
+		Obj: NewRequest{
+			Time:    now,
+			Event:   EventTypeStatus,
+			Channel: msg.Channel,
+			Who:     who,
+		},
 	})
 
 	w.Write(resp)

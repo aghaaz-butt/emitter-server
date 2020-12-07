@@ -70,7 +70,7 @@ func (s *Service) pollPresenceChange() {
 func (s *Service) send(ev *Notification) {
 	channel := []byte("emitter/presence/") // TODO: avoid allocation
 	if encoded, ok := ev.Encode(); ok {
-		s.pubsub.Publish(message.New(ev.Ssid, channel, encoded), ev.filter)
+		s.pubsub.Publish(message.New(ev.Obj.Ssid, channel, encoded), ev.Obj.filter)
 	}
 }
 
