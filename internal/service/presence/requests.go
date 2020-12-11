@@ -55,12 +55,12 @@ const (
 // Response represents a state notification.
 type Response struct {
 	Type 	string   `json:"type"`
-	Obj		NewRequest `json:"obj"`
+	Packet		NewRequest `json:"packet"`
 }
 
 // ForRequest sets the request ID in the response for matching
 func (r *Response) ForRequest(id uint16) {
-	r.Obj.Request = id
+	r.Packet.Request = id
 }
 
 // ------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ type NewRequest struct {
 // Notification represents a state notification.
 type Notification struct {
 	Type    string                        `json:"type"`    // The UNIX timestamp.
-	Obj		NewInfo					  	  `json:"obj"`
+	Packet		NewInfo					  `json:"packet"`
 }
 
 // newNotification creates a new notification payload.
@@ -120,7 +120,7 @@ func newNotification(event EventType, ev *event.Subscription, filter func(messag
 
 	return &Notification{
 		Type:  "presence",
-		Obj: NewInfo{
+		Packet: NewInfo{
 			filter:  filter,
 			Ssid:    message.NewSsidForPresence(ev.Ssid),
 			Time:    time.Now().UTC().Unix(),

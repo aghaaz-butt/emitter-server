@@ -132,7 +132,7 @@ func TestPresence_OnRequest(t *testing.T) {
 		assert.Equal(t, tc.success, ok)
 
 		if resp, ok := r.(*Response); ok {
-			assert.Equal(t, tc.expectStatus, len(resp.Obj.Who))
+			assert.Equal(t, tc.expectStatus, len(resp.Packet.Who))
 		}
 
 		if tc.success {
@@ -227,7 +227,7 @@ func TestPresence_OnHTTP(t *testing.T) {
 			var resp Response
 			err := json.Unmarshal(rr.Body.Bytes(), &resp)
 			assert.NoError(t, err)
-			assert.Equal(t, tc.expectStatus, len(resp.Obj.Who))
+			assert.Equal(t, tc.expectStatus, len(resp.Packet.Who))
 		}
 	}
 }

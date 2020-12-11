@@ -92,7 +92,7 @@ func (s *Service) OnRequest(c service.Conn, payload []byte) (service.Response, b
 		who = append(who, s.getAllPresence(ssid)...)
 		return &Response{
 			Type:	"presence",
-			Obj: NewRequest{
+			Packet: NewRequest{
 				Time:    now,
 				Event:   EventTypeStatus,
 				Channel: msg.Channel,
@@ -149,7 +149,7 @@ func (s *Service) OnHTTP(w http.ResponseWriter, r *http.Request) {
 	who := s.getAllPresence(ssid)
 	resp, _ := json.Marshal(&Response{
 		Type: "presence",
-		Obj: NewRequest{
+		Packet: NewRequest{
 			Time:    now,
 			Event:   EventTypeStatus,
 			Channel: msg.Channel,
